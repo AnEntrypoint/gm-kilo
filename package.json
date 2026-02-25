@@ -1,6 +1,6 @@
 {
   "name": "gm-kilo",
-  "version": "2.0.14",
+  "version": "2.0.19",
   "description": "Advanced CLI plugin with WFGY integration and code execution skills",
   "author": "AnEntrypoint",
   "license": "MIT",
@@ -44,7 +44,6 @@
     "gm.js",
     "index.js",
     "kilocode.json",
-    ".github/",
     ".mcp.json",
     "README.md",
     "cli.js",
