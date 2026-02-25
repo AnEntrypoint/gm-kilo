@@ -21,7 +21,6 @@ try {
     ['agents', 'agents'],
     ['hooks', 'hooks'],
     ['skills', 'skills'],
-    ['scripts', 'scripts'],
     ['index.js', 'index.js'],
     ['gm.js', 'gm.js'],
     ['kilocode.json', 'kilocode.json'],

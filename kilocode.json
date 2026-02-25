@@ -3,5 +3,25 @@
   "default_agent": "gm",
   "plugin": [
     "gm-kilo"
-  ]
+  ],
+  "mcp": {
+    "dev": {
+      "type": "local",
+      "command": "bun x",
+      "args": [
+        "mcp-gm@latest"
+      ],
+      "timeout": 360000,
+      "enabled": true
+    },
+    "code-search": {
+      "type": "local",
+      "command": "bun x",
+      "args": [
+        "codebasesearch@latest"
+      ],
+      "timeout": 360000,
+      "enabled": true
+    }
+  }
 }

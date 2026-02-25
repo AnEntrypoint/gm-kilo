@@ -1,7 +1,7 @@
 {
   "name": "gm-kilo",
-  "version": "2.0.19",
-  "description": "Advanced CLI plugin with WFGY integration and code execution skills",
+  "version": "2.0.16",
+  "description": "Advanced Claude Code plugin with WFGY integration, MCP tools, and automated hooks",
   "author": "AnEntrypoint",
   "license": "MIT",
   "main": "gm.js",
@@ -44,6 +44,7 @@
     "gm.js",
     "index.js",
     "kilocode.json",
+    ".github/",
     ".mcp.json",
     "README.md",
     "cli.js",
