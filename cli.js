@@ -15,6 +15,11 @@ const isUpgrade = fs.existsSync(destDir);
 console.log(isUpgrade ? 'Upgrading gm-kilo...' : 'Installing gm-kilo...');
 
 try {
+  // Clean managed subdirectories to remove stale files from old versions
+  for (const dir of ['agents', 'hooks', 'skills']) {
+    const p = path.join(destDir, dir);
+    if (fs.existsSync(p)) fs.rmSync(p, { recursive: true, force: true });
+  }
   fs.mkdirSync(destDir, { recursive: true });
 
   const filesToCopy = [

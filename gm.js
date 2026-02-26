@@ -12,14 +12,6 @@ const GmPlugin = async ({ project, client, $, directory, worktree }) => {
     return agentRules;
   };
 
-  const runThornsAnalysis = async () => {
-    try {
-      thornsOutput = '=== mcp-thorns ===\n' + analyze(directory);
-    } catch (e) {
-      thornsOutput = '=== mcp-thorns ===\nSkipped (' + e.message + ')';
-    }
-  };
-
   const runSessionIdle = async () => {
     if (!client || !client.tui) return;
     const blockReasons = [];
