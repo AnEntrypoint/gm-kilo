@@ -1,1 +1,1 @@
-module.exports = { GmPlugin: require('./gm.js').GmPlugin };
+module.exports = { GmPlugin: require('./gm-kilo.mjs').GmPlugin };

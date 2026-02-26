@@ -2,44 +2,18 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { execSync } = require('child_process');
 
 const homeDir = process.env.HOME || process.env.USERPROFILE || os.homedir();
-const destDir = process.platform === 'win32'
-  ? path.join(homeDir, 'AppData', 'Roaming', 'kilo', 'plugin')
-  : path.join(homeDir, '.config', 'kilo', 'plugin');
-
+const kiloConfigDir = path.join(homeDir, '.config', 'kilo');
 const srcDir = __dirname;
-const isUpgrade = fs.existsSync(destDir);
+const pluginMarker = path.join(kiloConfigDir, 'plugins', 'gm-kilo.mjs');
+const isUpgrade = fs.existsSync(pluginMarker);
 
 console.log(isUpgrade ? 'Upgrading gm-kilo...' : 'Installing gm-kilo...');
 
 try {
-  // Clean all managed files/dirs except node_modules to remove stale files
-  if (fs.existsSync(destDir)) {
-    for (const entry of fs.readdirSync(destDir)) {
-      if (entry !== 'node_modules' && entry !== 'package-lock.json') {
-        fs.rmSync(path.join(destDir, entry), { recursive: true, force: true });
-      }
-    }
-  }
-  fs.mkdirSync(destDir, { recursive: true });
-
-  const filesToCopy = [
-    ['agents', 'agents'],
-    ['hooks', 'hooks'],
-    ['skills', 'skills'],
-    ['index.js', 'index.js'],
-    ['gm.js', 'gm.js'],
-    ['kilocode.json', 'kilocode.json'],
-    ['package.json', 'package.json'],
-    ['.mcp.json', '.mcp.json'],
-    ['README.md', 'README.md'],
-    ['LICENSE', 'LICENSE'],
-    ['CONTRIBUTING.md', 'CONTRIBUTING.md'],
-    ['.gitignore', '.gitignore'],
-    ['.editorconfig', '.editorconfig']
-  ];
+  fs.mkdirSync(path.join(kiloConfigDir, 'plugins'), { recursive: true });
+  fs.mkdirSync(path.join(kiloConfigDir, 'agents'), { recursive: true });
 
   function copyRecursive(src, dst) {
     if (!fs.existsSync(src)) return;
@@ -51,19 +25,43 @@ try {
     }
   }
 
-  filesToCopy.forEach(([src, dst]) => copyRecursive(path.join(srcDir, src), path.join(destDir, dst)));
+  // Install ESM plugin for kilo auto-loading from plugins directory
+  fs.copyFileSync(path.join(srcDir, 'gm-kilo.mjs'), path.join(kiloConfigDir, 'plugins', 'gm-kilo.mjs'));
 
+  // Copy agents and skills into kilo config dir
+  copyRecursive(path.join(srcDir, 'agents'), path.join(kiloConfigDir, 'agents'));
+  copyRecursive(path.join(srcDir, 'skills'), path.join(kiloConfigDir, 'skills'));
+
+  // Write/fix kilocode.json — merge MCP from package, set default_agent, fix $schema
+  const kiloJsonPath = path.join(kiloConfigDir, 'kilocode.json');
+  let kiloConfig = {};
   try {
-    console.log('Installing dependencies...');
-    execSync('npm install', { cwd: destDir, stdio: 'inherit' });
-  } catch (e) {
-    console.warn('npm install encountered an issue, but installation may still work');
+    const raw = fs.readFileSync(kiloJsonPath, 'utf-8');
+    kiloConfig = JSON.parse(raw);
+    // Fix corrupted $schema key (written as "" in older versions)
+    if (kiloConfig['']) { delete kiloConfig['']; }
+  } catch (e) {}
+  try {
+    const pkgConfig = JSON.parse(fs.readFileSync(path.join(srcDir, 'kilocode.json'), 'utf-8'));
+    if (pkgConfig.mcp) kiloConfig.mcp = Object.assign({}, pkgConfig.mcp, kiloConfig.mcp);
+  } catch (e) {}
+  kiloConfig['$schema'] = 'https://kilo.ai/config.json';
+  kiloConfig.default_agent = 'gm';
+  // Remove stale local-path plugin reference
+  if (Array.isArray(kiloConfig.plugin)) {
+    kiloConfig.plugin = kiloConfig.plugin.filter(p => !path.isAbsolute(p) && !p.startsWith('C:') && !p.startsWith('/'));
+    if (kiloConfig.plugin.length === 0) delete kiloConfig.plugin;
+  }
+  fs.writeFileSync(kiloJsonPath, JSON.stringify(kiloConfig, null, 2) + '\n');
+
+  // Clean old AppData install location (no longer used by kilo)
+  const oldDir = process.platform === 'win32'
+    ? path.join(homeDir, 'AppData', 'Roaming', 'kilo', 'plugin') : null;
+  if (oldDir && fs.existsSync(oldDir)) {
+    try { fs.rmSync(oldDir, { recursive: true, force: true }); } catch (e) {}
   }
 
-  const destPath = process.platform === 'win32'
-    ? destDir.replace(/\\/g, '/')
-    : destDir;
-  console.log(`✓ gm-kilo ${isUpgrade ? 'upgraded' : 'installed'} to ${destPath}`);
+  console.log(`✓ gm-kilo ${isUpgrade ? 'upgraded' : 'installed'} to ${kiloConfigDir}`);
   console.log('Restart Kilo CLI to activate.');
 } catch (e) {
   console.error('Installation failed:', e.message);
