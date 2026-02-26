@@ -28,11 +28,10 @@ try {
   // Install ESM plugin for kilo auto-loading from plugins directory
   fs.copyFileSync(path.join(srcDir, 'gm-kilo.mjs'), path.join(kiloConfigDir, 'plugins', 'gm-kilo.mjs'));
 
-  // Copy agents and skills into kilo config dir
+  // Copy agents into kilo config dir
   copyRecursive(path.join(srcDir, 'agents'), path.join(kiloConfigDir, 'agents'));
-  copyRecursive(path.join(srcDir, 'skills'), path.join(kiloConfigDir, 'skills'));
 
-  // Write/fix kilocode.json — merge MCP from package, set default_agent, fix $schema
+  // Write/fix kilocode.json — set default_agent, fix $schema
   const kiloJsonPath = path.join(kiloConfigDir, 'kilocode.json');
   let kiloConfig = {};
   try {
@@ -41,10 +40,8 @@ try {
     // Fix corrupted $schema key (written as "" in older versions)
     if (kiloConfig['']) { delete kiloConfig['']; }
   } catch (e) {}
-  try {
-    const pkgConfig = JSON.parse(fs.readFileSync(path.join(srcDir, 'kilocode.json'), 'utf-8'));
-    if (pkgConfig.mcp) kiloConfig.mcp = Object.assign({}, pkgConfig.mcp, kiloConfig.mcp);
-  } catch (e) {}
+  // Remove stale MCP config (no longer used)
+  delete kiloConfig.mcp;
   kiloConfig['$schema'] = 'https://kilo.ai/config.json';
   kiloConfig.default_agent = 'gm';
   // Remove stale local-path plugin reference
@@ -59,6 +56,14 @@ try {
     ? path.join(homeDir, 'AppData', 'Roaming', 'kilo', 'plugin') : null;
   if (oldDir && fs.existsSync(oldDir)) {
     try { fs.rmSync(oldDir, { recursive: true, force: true }); } catch (e) {}
+  }
+
+  // Install skills globally via the skills package (supports all agents)
+  const { execSync: execSync2 } = require('child_process');
+  try {
+    execSync2('bunx skills add AnEntrypoint/plugforge --full-depth --all --global --yes', { stdio: 'inherit' });
+  } catch (e) {
+    console.warn('Warning: skills install failed (non-fatal):', e.message);
   }
 
   console.log(`✓ gm-kilo ${isUpgrade ? 'upgraded' : 'installed'} to ${kiloConfigDir}`);
