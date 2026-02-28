@@ -9,7 +9,6 @@ export default async ({ project, client, $, directory, worktree }) => {
   let agentRules = '';
   let thornsPromise = null;
   let thornsOutput = '';
-  let thornsInjected = false;
 
   const loadAgentRules = () => {
     if (agentRules) return agentRules;
@@ -40,9 +39,10 @@ export default async ({ project, client, $, directory, worktree }) => {
       const prd = fs.existsSync(prdFile) ? fs.readFileSync(prdFile, 'utf-8').trim() : '';
       let content = rules || '';
       if (prd) content += '\n\nPENDING WORK (.prd):\n' + prd;
-      // Inject thorns only once at start of conversation
-      if (!thornsInjected) {
-        thornsInjected = true;
+      // Inject thorns only on the first API call of a conversation (no assistant messages yet)
+      const msgs = input?.messages || [];
+      const isFirstCall = !msgs.some(m => m.role === 'assistant');
+      if (isFirstCall) {
         const thorns = await startThorns();
         if (thorns) content += '\n\n=== Repository Analysis (mcp-thorns) ===\n' + thorns;
       }
