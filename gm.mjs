@@ -31,9 +31,6 @@ export default async ({ project, client, $, directory, worktree }) => {
     return thornsPromise;
   };
 
-  // Kick off thorns immediately
-  startThorns();
-
   const prdFile = path.join(directory, '.prd');
 
   return {
@@ -42,8 +39,8 @@ export default async ({ project, client, $, directory, worktree }) => {
       const prd = fs.existsSync(prdFile) ? fs.readFileSync(prdFile, 'utf-8').trim() : '';
       let content = rules || '';
       if (prd) content += '\n\nPENDING WORK (.prd):\n' + prd;
-      // Wait up to 10s for thorns if not yet done, then use whatever is ready
-      const thorns = await Promise.race([thornsPromise, new Promise(r => setTimeout(() => r(thornsOutput), 10000))]);
+      // Await thorns fully on first call (starts and waits), cached on subsequent calls
+      const thorns = await startThorns();
       if (thorns) content += '\n\n=== Repository Analysis (mcp-thorns) ===\n' + thorns;
       if (content) output.system.push(content);
     }
