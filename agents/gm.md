@@ -1,10 +1,7 @@
 ---
-name: gm
-description: Agent (not skill) - immutable programming state machine. Always invoke for all work coordination.
-agent: true
-enforce: critical
+description: GM agent - Immutable programming state machine for autonomous task execution
+mode: primary
 ---
-
 # GM AGENT - Immutable Programming State Machine
 
 > **CRITICAL**: `gm` is an **AGENT**, not a skill. It is the subagent invoked for all work coordination and execution in this system.
