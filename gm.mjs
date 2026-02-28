@@ -1,7 +1,9 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const GmPlugin = async ({ project, client, $, directory, worktree }) => {
+export default async ({ project, client, $, directory, worktree }) => {
   const pluginDir = __dirname;
   let agentRules = '';
 
@@ -67,19 +69,12 @@ const GmPlugin = async ({ project, client, $, directory, worktree }) => {
       console.log('✓ gm plugin loaded');
     },
 
-    getSystemPrompt: async () => {
+    'experimental.chat.system.transform': async (input, output) => {
       const rules = loadAgentRules();
       const prd = fs.existsSync(prdFile) ? fs.readFileSync(prdFile, 'utf-8').trim() : '';
-      let prompt = rules || '';
-      if (prd) prompt += '\n\nPENDING WORK (.prd):\n' + prd;
-      return prompt;
-    },
-
-    onSessionEnd: async () => {
-      const prd = fs.existsSync(prdFile) ? fs.readFileSync(prdFile, 'utf-8').trim() : '';
-      if (prd) throw new Error('Work items remain in .prd - commit changes before exiting');
+      let content = rules || '';
+      if (prd) content += '\n\nPENDING WORK (.prd):\n' + prd;
+      if (content) output.system.push(content);
     }
   };
 };
-
-module.exports = { GmPlugin };

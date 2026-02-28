@@ -1,10 +1,10 @@
 {
   "name": "gm-kilo",
-  "version": "2.0.29",
+  "version": "2.0.30",
   "description": "State machine agent with hooks, skills, and automated git enforcement",
   "author": "AnEntrypoint",
   "license": "MIT",
-  "main": "gm.js",
+  "main": "gm.mjs",
   "bin": {
     "gm-kilo": "./cli.js",
     "gm-kilo-install": "./install.js"
@@ -41,8 +41,8 @@
     "hooks/",
     "skills/",
     "scripts/",
-    "gm.js",
-    "index.js",
+    "gm.mjs",
+    "index.mjs",
     "kilocode.json",
     ".github/",
     ".mcp.json",
