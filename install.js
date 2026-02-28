@@ -52,6 +52,23 @@ function safeCopyDirectory(src, dst) {
   }
 }
 
+function safeCopyFile(src, dst) {
+  try {
+    if (!fs.existsSync(src)) {
+      return false;
+    }
+    const content = fs.readFileSync(src, 'utf-8');
+    const dstDir = path.dirname(dst);
+    if (!fs.existsSync(dstDir)) {
+      fs.mkdirSync(dstDir, { recursive: true });
+    }
+    fs.writeFileSync(dst, content, 'utf-8');
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
 function install() {
   if (!isInsideNodeModules()) {
     return;
@@ -62,11 +79,13 @@ function install() {
     return;
   }
 
-  const kiloDir = path.join(projectRoot, '.config', 'kilo', 'plugin');
+  const kiloDir = path.join(projectRoot, '.config', 'kilo');
   const sourceDir = __dirname;
 
   safeCopyDirectory(path.join(sourceDir, 'agents'), path.join(kiloDir, 'agents'));
   safeCopyDirectory(path.join(sourceDir, 'hooks'), path.join(kiloDir, 'hooks'));
+  safeCopyFile(path.join(sourceDir, 'kilocode.json'), path.join(kiloDir, 'kilocode.json'));
+  safeCopyFile(path.join(sourceDir, '.mcp.json'), path.join(kiloDir, '.mcp.json'));
 }
 
 install();

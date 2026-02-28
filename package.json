@@ -1,6 +1,6 @@
 {
   "name": "gm-kilo",
-  "version": "2.0.25",
+  "version": "2.0.26",
   "description": "State machine agent with hooks, skills, and automated git enforcement",
   "author": "AnEntrypoint",
   "license": "MIT",
@@ -12,6 +12,7 @@
   "keywords": [
     "kilo",
     "kilo-cli",
+    "mcp",
     "automation",
     "gm"
   ],
@@ -29,19 +30,22 @@
   "publishConfig": {
     "access": "public"
   },
-  "dependencies": {},
+  "dependencies": {
+    "mcp-thorns": "^4.1.0"
+  },
   "scripts": {
     "postinstall": "node scripts/postinstall.js"
   },
   "files": [
     "agents/",
     "hooks/",
+    "skills/",
     "scripts/",
     "gm.js",
-    "gm-kilo.mjs",
     "index.js",
     "kilocode.json",
     ".github/",
+    ".mcp.json",
     "README.md",
     "cli.js",
     "install.js",
