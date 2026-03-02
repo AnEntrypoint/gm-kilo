@@ -54,11 +54,11 @@ The .prd path must resolve to exactly ./.prd in current working directory. No va
 
 Scope: Where and how code runs. Governs tool selection and execution context.
 
-All execution via `dev` skill or `agent-browser` skill. Every hypothesis proven by execution before changing files. Know nothing until execution proves it.
+All execution via `code_execution` tool (Python) or `agent-browser` skill. Every hypothesis proven by execution before changing files. Know nothing until execution proves it.
 
-**CODE YOUR HYPOTHESES**: Test every possible hypothesis using the `dev` skill or `agent-browser` skill. Each execution run must be under 15 seconds and must intelligently test every possible related idea—never one idea per run. Run every possible execution needed, but each one must be densely packed with every possible related hypothesis. File existence, schema validity, output format, error conditions, edge cases—group every possible related unknown together. The goal is every possible hypothesis per run. Use `agent-browser` skill for cross-client UI testing and browser-based hypothesis validation.
+**CODE YOUR HYPOTHESES**: Test every possible hypothesis using the `code_execution` tool with Python or `agent-browser` skill. Each run must be under 15 seconds and must densely pack every possible related hypothesis. File existence, schema validity, output format, error conditions, edge cases—group every possible related unknown together. The goal is every possible hypothesis per run. Use `agent-browser` skill for cross-client UI testing and browser-based hypothesis validation.
 
-**DEFAULT IS CODE, NOT BASH**: `dev` skill is the primary execution tool. Bash is a last resort for operations that cannot be done in code (git, npm publish, docker). If you find yourself writing a bash command, stop and ask: can this be done in the `dev` skill? The answer is almost always yes.
+**DEFAULT IS code_execution WITH PYTHON**: Call the `code_execution` tool with Python code. The PreToolUse hook intercepts it, runs python3, and returns the output. Bash is blocked except for git, npm publish, and docker. If you find yourself writing a bash command, stop and ask: can this be done in Python? The answer is almost always yes. Use `subprocess.run()` for shell operations that truly can't be done otherwise.
 
 **TOOL POLICY**: All code execution via `dev` skill. Use `code-search` skill for exploration. Reference TOOL_INVARIANTS for enforcement.
 
@@ -74,8 +74,8 @@ All execution via `dev` skill or `agent-browser` skill. Every hypothesis proven 
 
 **REQUIRED TOOL MAPPING**:
 - Code exploration: `code-search` skill — THE ONLY exploration tool. Semantic search 102 file types. Natural language queries with line numbers. No glob, no grep, no find, no explore agent, no Read for discovery.
-- Code execution: `dev` skill — run JS/TS/Python/Go/Rust/etc via Bash
-- File operations: `dev` skill with bun/node fs inline — read, write, stat files
+- Code execution: call the `code_execution` tool directly with Python code — the PreToolUse hook intercepts it, runs python3, and returns `[CODE EXECUTION RESULT]\nstdout: ...\nstderr: ...\nexit_code: N` as the result. Use Python's `subprocess` module for shell operations, `pathlib`/`os` for files, `requests` for HTTP.
+- File operations: `code_execution` tool with Python `pathlib`/`os`/`open()` — read, write, stat files
 - Bash: ONLY git, npm publish/pack, docker, system daemons
 - Browser: Use **`agent-browser` skill** instead of puppeteer/playwright - same power, cleaner syntax, built for AI agents
 
