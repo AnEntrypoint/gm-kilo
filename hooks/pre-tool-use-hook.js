@@ -59,23 +59,8 @@ const run = () => {
       const command = (tool_input?.command || '').trim();
       const allowed = /^(git |npm publish|npm pack|docker |sudo systemctl|systemctl )/.test(command);
       if (!allowed) {
-        return { block: true, reason: 'Bash is blocked. Use the code_execution tool with Python instead. The hook intercepts code_execution, runs python3, and returns stdout/stderr/exit_code. Example: use code_execution with code "import subprocess; r=subprocess.run([\'node\',\'--version\'],capture_output=True,text=True); print(r.stdout)"' };
+        return { block: true, reason: 'Bash is blocked. Use the code_execution MCP tool instead. It supports Python, JS/TS, Go, Rust, C/C++ and bash via the language parameter. Example: code_execution({ code: "print(1+1)", language: "python", workingDirectory: process.cwd() })' };
       }
-    }
-
-    if (tool_name === 'code_execution') {
-      const code = tool_input?.code || '';
-      const { spawnSync } = require('child_process');
-      const proc = spawnSync('python3', ['-'], {
-        input: code,
-        encoding: 'utf-8',
-        timeout: 30000
-      });
-      const stdout = proc.stdout || '';
-      const stderr = proc.stderr || '';
-      const exitCode = proc.status !== null ? proc.status : 1;
-      const result = `[CODE EXECUTION RESULT]\nstdout: ${stdout}\nstderr: ${stderr}\nexit_code: ${exitCode}`;
-      return { block: true, reason: result };
     }
 
     return { allow: true };
