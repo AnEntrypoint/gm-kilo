@@ -57,7 +57,7 @@ const run = () => {
 
     if (tool_name === 'Bash') {
       const command = (tool_input?.command || '').trim();
-      const allowed = /^(git |npm publish|npm pack|docker |sudo systemctl|systemctl )/.test(command);
+      const allowed = /^(git |gh |npm publish|npm pack|docker |sudo systemctl|systemctl )/.test(command);
       if (!allowed) {
         return { block: true, reason: 'Bash is blocked. Use the code_execution MCP tool instead. It supports Python, JS/TS, Go, Rust, C/C++ and bash via the language parameter. Example: code_execution({ code: "print(1+1)", language: "python", workingDirectory: process.cwd() })' };
       }
