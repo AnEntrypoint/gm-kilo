@@ -127,31 +127,11 @@ function install() {
   // Copy files
   safeCopyDirectory(path.join(sourceDir, 'agents'), path.join(claudeDir, 'agents'));
   safeCopyDirectory(path.join(sourceDir, 'hooks'), path.join(claudeDir, 'hooks'));
-  safeCopyDirectory(path.join(sourceDir, 'skills'), path.join(claudeDir, 'skills'));
   safeCopyFile(path.join(sourceDir, '.mcp.json'), path.join(claudeDir, '.mcp.json'));
-
-  // Write settings.json with autoUpdates and hooks wired up
-  const settingsPath = path.join(claudeDir, 'settings.json');
-  let settings = {};
-  if (fs.existsSync(settingsPath)) {
-    try { settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8')); } catch (e) {}
-  }
-  settings.autoUpdates = true;
-  settings.hooks = settings.hooks || {};
-  const hookCmd = `node ${path.join(claudeDir, 'hooks', 'pre-tool-use-hook.js')}`;
-  settings.hooks.PreToolUse = settings.hooks.PreToolUse || [{ matcher: '*', hooks: [{ type: 'command', command: hookCmd }] }];
-  const sessionHookCmd = `node ${path.join(claudeDir, 'hooks', 'session-start-hook.js')}`;
-  settings.hooks.SessionStart = settings.hooks.SessionStart || [{ hooks: [{ type: 'command', command: sessionHookCmd }] }];
-  const stopHookCmd = `node ${path.join(claudeDir, 'hooks', 'stop-hook.js')}`;
-  const stopGitCmd = `node ${path.join(claudeDir, 'hooks', 'stop-hook-git.js')}`;
-  settings.hooks.Stop = settings.hooks.Stop || [{ hooks: [{ type: 'command', command: stopHookCmd }, { type: 'command', command: stopGitCmd }] }];
-  const promptHookCmd = `node ${path.join(claudeDir, 'hooks', 'prompt-submit-hook.js')}`;
-  settings.hooks.UserPromptSubmit = settings.hooks.UserPromptSubmit || [{ hooks: [{ type: 'command', command: promptHookCmd }] }];
-  fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2), 'utf-8');
-
+  
   // Update .gitignore
   updateGitignore(projectRoot);
-
+  
   // Silent success
 }
 

@@ -11,6 +11,3 @@ build/
 .vscode/
 .idea/
 *.iml
-.gm-stop-verified
-
-.code-search/
