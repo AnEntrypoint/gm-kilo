@@ -1,48 +1,54 @@
 ---
 name: dev
-description: Execute code and shell commands. Use for all code execution, file operations, running scripts, testing hypotheses, and any task that requires running code. Replaces plugin:gm:dev and mcp-glootie.
-allowed-tools: Bash
+description: Execute code by calling the code_execution tool with Python code. The PreToolUse hook intercepts code_execution calls, runs the Python via python3, and returns stdout/stderr/exit_code as the result. Use for all code execution, file operations, running scripts, and hypothesis testing.
+allowed-tools: Bash,code_execution
 ---
 
 # Code Execution with dev
 
-Execute code directly using the Bash tool. No wrapper, no persistent files, no cleanup needed beyond what the code itself creates.
+Use the `code_execution` tool with Python code. The hook intercepts the call, executes the Python locally, and returns the result as a deny reason formatted as:
+
+```
+[CODE EXECUTION RESULT]
+stdout: <output>
+stderr: <errors>
+exit_code: <N>
+```
 
 ## Run code inline
 
-```bash
-# JavaScript / TypeScript
-bun -e "const fs = require('fs'); console.log(fs.readdirSync('.'))"
-bun -e "import { readFileSync } from 'fs'; console.log(readFileSync('package.json', 'utf-8'))"
+```python
+# File operations
+import os, json
+print(json.dumps(os.listdir('.')))
 
-# Run a file
-bun run script.ts
-node script.js
+# Read a file
+with open('package.json') as f:
+    print(f.read())
 
-# Python
-python -c "import json; print(json.dumps({'ok': True}))"
-
-# Shell
-bash -c "ls -la && cat package.json"
-```
-
-## File operations (inline, no temp files)
-
-```bash
-# Read
-bun -e "console.log(require('fs').readFileSync('path/to/file', 'utf-8'))"
-
-# Write
-bun -e "require('fs').writeFileSync('out.json', JSON.stringify({x:1}, null, 2))"
+# Write a file
+with open('out.json', 'w') as f:
+    import json
+    json.dump({'ok': True}, f, indent=2)
 
 # Stat / exists
-bun -e "const fs=require('fs'); console.log(fs.existsSync('file.txt'), fs.statSync?.('.')?.size)"
+import os
+print(os.path.exists('file.txt'), os.path.getsize('.'))
+
+# HTTP requests
+import urllib.request
+resp = urllib.request.urlopen('https://example.com')
+print(resp.read()[:200])
+
+# Run subprocess
+import subprocess
+r = subprocess.run(['node', '--version'], capture_output=True, text=True)
+print(r.stdout)
 ```
 
 ## Rules
 
 - Each run under 15 seconds
 - Pack every related hypothesis into one run — never one idea per run
-- No persistent temp files; if a temp file is needed, delete it in the same command
-- No spawn/exec/fork inside executed code
-- Use `bun` over `node` when available
+- No persistent temp files; if a temp file is needed, delete it in the same code
+- Use `code_execution` tool for all execution; Bash only for git/npm publish/docker

@@ -55,6 +55,21 @@ const run = () => {
       return { block: true, reason: 'Plan mode is disabled. Use GM agent planning (PLAN→EXECUTE→EMIT→VERIFY→COMPLETE state machine) via gm:gm subagent instead.' };
     }
 
+    if (tool_name === 'code_execution') {
+      const code = tool_input?.code || '';
+      const { spawnSync } = require('child_process');
+      const proc = spawnSync('python3', ['-'], {
+        input: code,
+        encoding: 'utf-8',
+        timeout: 30000
+      });
+      const stdout = proc.stdout || '';
+      const stderr = proc.stderr || '';
+      const exitCode = proc.status !== null ? proc.status : 1;
+      const result = `[CODE EXECUTION RESULT]\nstdout: ${stdout}\nstderr: ${stderr}\nexit_code: ${exitCode}`;
+      return { block: true, reason: result };
+    }
+
     return { allow: true };
   } catch (error) {
     return { allow: true };
