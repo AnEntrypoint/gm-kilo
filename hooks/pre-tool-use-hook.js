@@ -55,6 +55,14 @@ const run = () => {
       return { block: true, reason: 'Plan mode is disabled. Use GM agent planning (PLAN→EXECUTE→EMIT→VERIFY→COMPLETE state machine) via gm:gm subagent instead.' };
     }
 
+    if (tool_name === 'Bash') {
+      const command = (tool_input?.command || '').trim();
+      const allowed = /^(git |npm publish|npm pack|docker |sudo systemctl|systemctl )/.test(command);
+      if (!allowed) {
+        return { block: true, reason: 'Bash is blocked. Use the code_execution tool with Python instead. The hook intercepts code_execution, runs python3, and returns stdout/stderr/exit_code. Example: use code_execution with code "import subprocess; r=subprocess.run([\'node\',\'--version\'],capture_output=True,text=True); print(r.stdout)"' };
+      }
+    }
+
     if (tool_name === 'code_execution') {
       const code = tool_input?.code || '';
       const { spawnSync } = require('child_process');
@@ -85,7 +93,7 @@ try {
     } else {
       console.log(JSON.stringify({ hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'deny', permissionDecisionReason: result.reason } }));
     }
-    process.exit(2);
+    process.exit(0);
   }
 
   if (isGemini) {
