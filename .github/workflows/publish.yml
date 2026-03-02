@@ -32,8 +32,8 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Build ${{ matrix.name }}
-        run: node cli.js plugforge-starter ./build
+      - name: Build all platforms
+        run: node build.js ./build
 
       - name: Validate build output
         run: |
