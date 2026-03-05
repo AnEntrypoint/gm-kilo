@@ -1,6 +1,6 @@
 {
   "name": "gm-kilo",
-  "version": "2.0.77",
+  "version": "2.0.78",
   "description": "State machine agent with hooks, skills, and automated git enforcement",
   "author": "AnEntrypoint",
   "license": "MIT",
@@ -35,7 +35,7 @@
     "codebasesearch": "latest"
   },
   "scripts": {
-    "postinstall": "node scripts/postinstall.js"
+    "postinstall": "node scripts/postinstall-kilo.js"
   },
   "files": [
     "agents/",
