@@ -27,7 +27,6 @@ try {
     ['.mcp.json', '.mcp.json'],
     ['README.md', 'README.md'],
     ['LICENSE', 'LICENSE'],
-    ['CONTRIBUTING.md', 'CONTRIBUTING.md'],
     ['.gitignore', '.gitignore'],
     ['.editorconfig', '.editorconfig']
   ];
