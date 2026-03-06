@@ -13,18 +13,6 @@
         ]
       }
     ],
-    "session.created": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node ${KILO_PLUGIN_ROOT}/hooks/session-start-hook.js",
-            "timeout": 10000
-          }
-        ]
-      }
-    ],
     "message.updated": [
       {
         "matcher": "*",
@@ -32,7 +20,7 @@
           {
             "type": "command",
             "command": "node ${KILO_PLUGIN_ROOT}/hooks/prompt-submit-hook.js",
-            "timeout": 3600
+            "timeout": 180000
           }
         ]
       }
