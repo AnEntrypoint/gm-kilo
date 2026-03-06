@@ -1,4 +1,4 @@
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync, readdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { exec } from 'child_process';
 import { fileURLToPath } from 'url';
@@ -57,6 +57,47 @@ export default async ({ directory }) => {
         if (search) content += '\n\n=== Semantic Code Search Results ===\n' + search;
       }
       if (content) output.system.push(content);
+    },
+    config: async (config) => {
+      if (!config.agent) config.agent = {};
+      const agentDir = join(__dirname, '..', 'agents');
+      if (!existsSync(agentDir)) return;
+      try {
+        const files = readdirSync(agentDir).filter(f => f.endsWith('.md'));
+        for (const file of files) {
+          try {
+            const content = readFileSync(join(agentDir, file), 'utf-8');
+            const lines = content.split('\n');
+            let inFm = false;
+            let fmEnd = -1;
+            let body = content;
+            for (let i = 0; i < lines.length; i++) {
+              if (lines[i].trim() === '---') {
+                if (!inFm) {
+                  inFm = true;
+                } else {
+                  fmEnd = i;
+                  body = lines.slice(i + 1).join('\n').trim();
+                  break;
+                }
+              }
+            }
+            let name = file.replace('.md', '');
+            let description = '';
+            let mode = 'subagent';
+            if (fmEnd > 0) {
+              const fmLines = lines.slice(1, fmEnd);
+              for (const line of fmLines) {
+                if (line.startsWith('name:')) name = line.slice(5).trim();
+                else if (line.startsWith('description:')) description = line.slice(12).trim();
+                else if (line.startsWith('mode:')) mode = line.slice(5).trim();
+              }
+            }
+            if (!description) description = name + ' agent';
+            config.agent[name] = { description, prompt: body, mode };
+          } catch (e) {}
+        }
+      } catch (e) {}
     }
   };
 };
